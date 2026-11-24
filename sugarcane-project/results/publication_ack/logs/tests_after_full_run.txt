@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/khalid_usman/venv/bin/python
+cachedir: .pytest_cache
+rootdir: /mnt/d/AOI course project/AOI project-tests
+configfile: pyproject.toml
+collecting ... collected 9 items
+
+tests/test_baseline.py::test_symmetric_baseline_matches_closed_form PASSED [ 11%]
+tests/test_baseline.py::test_random_walk_increments_are_valid PASSED     [ 22%]
+tests/test_channel.py::test_zero_loss_delivers_every_attempt PASSED      [ 33%]
+tests/test_channel.py::test_estimators_use_same_reception_trace PASSED   [ 44%]
+tests/test_channel.py::test_no_ack_resets_reference_on_failed_attempt PASSED [ 55%]
+tests/test_data.py::test_gap_creates_new_segment PASSED                  [ 66%]
+tests/test_data.py::test_chronological_split_preserves_order PASSED      [ 77%]
+tests/test_metrics.py::test_time_weighted_mean_with_irregular_times PASSED [ 88%]
+tests/test_metrics.py::test_freshness_metrics PASSED                     [100%]
+
+============================== 9 passed in 0.50s ===============================

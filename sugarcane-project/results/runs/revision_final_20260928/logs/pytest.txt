@@ -1,0 +1,55 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0 -- D:\AOI course project\AOI project-tests\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\AOI course project\AOI project-tests
+configfile: pyproject.toml
+testpaths: tests
+collecting ... collected 45 items
+
+tests/test_baseline.py::test_symmetric_baseline_matches_closed_form PASSED [  2%]
+tests/test_baseline.py::test_random_walk_increments_are_valid PASSED     [  4%]
+tests/test_channel.py::test_zero_loss_delivers_every_attempt PASSED      [  6%]
+tests/test_channel.py::test_estimators_use_same_reception_trace PASSED   [  8%]
+tests/test_channel.py::test_no_ack_resets_reference_on_failed_attempt PASSED [ 11%]
+tests/test_data.py::test_gap_creates_new_segment PASSED                  [ 13%]
+tests/test_data.py::test_chronological_split_preserves_order PASSED      [ 15%]
+tests/test_metrics.py::test_time_weighted_mean_with_irregular_times PASSED [ 17%]
+tests/test_metrics.py::test_freshness_metrics PASSED                     [ 20%]
+tests/test_revision.py::test_continuous_aoi_exact PASSED                 [ 22%]
+tests/test_revision.py::test_deadline_crossing_within_interval[5-0.5] PASSED [ 24%]
+tests/test_revision.py::test_deadline_crossing_within_interval[10-0.0] PASSED [ 26%]
+tests/test_revision.py::test_deadline_crossing_within_interval[2-0.8] PASSED [ 28%]
+tests/test_revision.py::test_peak_before_reset PASSED                    [ 31%]
+tests/test_revision.py::test_irregular_continuous_aoi PASSED             [ 33%]
+tests/test_revision.py::test_zero_attempt_pdr PASSED                     [ 35%]
+tests/test_revision.py::test_aggregate_pdr_is_ratio_of_totals PASSED     [ 37%]
+tests/test_revision.py::test_delivery_subset_validation PASSED           [ 40%]
+tests/test_revision.py::test_seed_stable_and_identity_sensitive PASSED   [ 42%]
+tests/test_revision.py::test_nodes_have_independent_loss_streams PASSED  [ 44%]
+tests/test_revision.py::test_seed_sets_reject_overlap PASSED             [ 46%]
+tests/test_revision.py::test_delay_rejected PASSED                       [ 48%]
+tests/test_revision.py::test_normalized_constant_trace_guard PASSED      [ 51%]
+tests/test_revision.py::test_local_linear_receiver_only_and_clipped PASSED [ 53%]
+tests/test_revision.py::test_clipping_and_calibration_training_only PASSED [ 55%]
+tests/test_revision.py::test_normalized_tables_and_shared_trace PASSED   [ 57%]
+tests/test_revision.py::test_legacy_deadlines_never_increase_pairs PASSED [ 60%]
+tests/test_revision.py::test_conflicting_legacy_duplicate_rejected PASSED [ 62%]
+tests/test_revision.py::test_ratio_of_means_not_mean_percentages PASSED  [ 64%]
+tests/test_revision.py::test_bootstrap_reproducible_with_independent_nodes PASSED [ 66%]
+tests/test_revision.py::test_nested_weighting_equal_nodes PASSED         [ 68%]
+tests/test_revision.py::test_fdr_known_values PASSED                     [ 71%]
+tests/test_revision.py::test_exact_sign_flip PASSED                      [ 73%]
+tests/test_revision.py::test_summary_group_counts_and_deadline_multipliers PASSED [ 75%]
+tests/test_revision.py::test_gilbert_elliott_stationary_loss_and_burst_length[0.1] PASSED [ 77%]
+tests/test_revision.py::test_gilbert_elliott_stationary_loss_and_burst_length[0.3] PASSED [ 80%]
+tests/test_revision.py::test_gilbert_elliott_stationary_loss_and_burst_length[0.5] PASSED [ 82%]
+tests/test_revision.py::test_burst_parameters_and_zero_loss PASSED       [ 84%]
+tests/test_revision.py::test_chronological_no_overlap PASSED             [ 86%]
+tests/test_revision.py::test_run_collision_preserves_data PASSED         [ 88%]
+tests/test_revision.py::test_all_node_figure_input PASSED                [ 91%]
+tests/test_revision.py::test_complete_quick_integration PASSED           [ 93%]
+tests/test_revision.py::test_1200_pairs_not_3600_deadline_copies PASSED  [ 95%]
+tests/test_revision.py::test_optional_scenarios_preserve_paired_design[no_ack-bernoulli] PASSED [ 97%]
+tests/test_revision.py::test_optional_scenarios_preserve_paired_design[ack-gilbert_elliott] PASSED [100%]
+
+============================= 45 passed in 20.69s =============================

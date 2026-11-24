@@ -1,0 +1,12 @@
+{
+  "finite": true,
+  "rows": true,
+  "slots": 1000000,
+  "max_relative_error": {
+    "update_rate": 0.006899006899006854,
+    "mean_aoi": 0.011212544146675947,
+    "mse": 0.0069742797015523925
+  },
+  "analytical_agreement_within_5_percent": true,
+  "passed": true
+}

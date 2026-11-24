@@ -1,0 +1,6 @@
+{
+  "estimation": 3200,
+  "channel": 800,
+  "freshness": 2400,
+  "calibration": 480
+}

@@ -1,0 +1,1001 @@
+---
+title: "Tomato cultivation AoI figures"
+author: "umar Aziz"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = normalizePath("..", mustWork = TRUE))
+```
+
+```{r publication-figures, message=FALSE}
+
+# ============================================================
+# ICIT 2027 - PUBLICATION QUALITY FIGURES
+# Five CSV files | Five scientific figures
+# Author: Umar Aziz
+#
+# Output: PDF, PNG (600 dpi), TIFF (600 dpi)
+#
+# Statistical integrity:
+# No recomputation of means, confidence intervals or q-values.
+# ============================================================
+
+
+# ============================================================
+# 0. INSTALL AND LOAD PACKAGES
+# ============================================================
+
+packages <- c(
+  "readr",
+  "dplyr",
+  "tidyr",
+  "ggplot2",
+  "patchwork",
+  "scales"
+)
+
+missing_packages <- packages[
+  !packages %in% rownames(installed.packages())
+]
+
+if (length(missing_packages) > 0) {
+  stop("Install these R packages before rendering: ", paste(missing_packages, collapse = ", "))
+}
+
+invisible(lapply(packages, library, character.only = TRUE))
+
+
+# ============================================================
+# 1. WORKING DIRECTORY
+# ============================================================
+
+data_dir <- getwd()
+
+output_dir <- file.path(data_dir, "generated-figures")
+
+dir.create(
+  output_dir,
+  showWarnings = FALSE,
+  recursive = TRUE
+)
+
+
+# ============================================================
+# 2. IMPORT ORIGINAL CSV FILES
+# ============================================================
+
+g1 <- read_csv(
+  "Graph_1_Baseline_Validation.csv",
+  show_col_types = FALSE
+)
+
+g2 <- read_csv(
+  "Graph_2_Accuracy_vs_Packet_Loss.csv",
+  show_col_types = FALSE
+)
+
+g3 <- read_csv(
+  "Graph_3_Weighted_Drift_Improvement.csv",
+  show_col_types = FALSE
+)
+
+g4 <- read_csv(
+  "Graph_4_Accuracy_Freshness_Communication.csv",
+  show_col_types = FALSE
+)
+
+g5 <- read_csv(
+  "Graph_5_Deadline_Freshness_Violations.csv",
+  show_col_types = FALSE
+)
+
+
+# ============================================================
+# 3. GLOBAL DESIGN SETTINGS
+# ============================================================
+
+# Publication color palette
+COL_NAVY   <- "#17365D"
+COL_BLUE   <- "#0072B2"
+COL_ORANGE <- "#D55E00"
+COL_GREEN  <- "#009E73"
+COL_PURPLE <- "#984EA3"
+COL_GREY   <- "#666666"
+
+# Estimator palette
+estimator_colors <- c(
+  "Hold" = COL_BLUE,
+  "Weighted drift" = COL_ORANGE,
+  "Local linear" = COL_GREEN,
+  "Full drift" = COL_PURPLE
+)
+
+# Feedback palette
+feedback_colors <- c(
+  "ACK" = COL_BLUE,
+  "No-ACK" = COL_ORANGE
+)
+
+# Deadline palette
+deadline_colors <- c(
+  "2x" = COL_BLUE,
+  "3x" = COL_ORANGE,
+  "6x" = COL_GREEN
+)
+
+
+# ------------------------------------------------------------
+# Publication theme
+# ------------------------------------------------------------
+
+theme_publication <- function(base_size = 11) {
+
+  theme_classic(
+    base_size = base_size,
+    base_family = "sans"
+  ) +
+
+    theme(
+
+      plot.title = element_text(
+        face = "bold",
+        size = 13,
+        color = "#202020",
+        margin = margin(b = 8)
+      ),
+
+      plot.subtitle = element_text(
+        size = 10,
+        color = COL_GREY
+      ),
+
+      axis.title = element_text(
+        face = "bold",
+        size = 10.5,
+        color = "#202020"
+      ),
+
+      axis.text = element_text(
+        size = 9,
+        color = "#303030"
+      ),
+
+      axis.line = element_line(
+        color = "#444444",
+        linewidth = 0.4
+      ),
+
+      axis.ticks = element_line(
+        color = "#444444",
+        linewidth = 0.35
+      ),
+
+      panel.grid.major.y = element_line(
+        color = "#EAEAEA",
+        linewidth = 0.3
+      ),
+
+      panel.grid.minor = element_blank(),
+
+      panel.background = element_rect(
+        fill = "white",
+        color = NA
+      ),
+
+      plot.background = element_rect(
+        fill = "white",
+        color = NA
+      ),
+
+      strip.background = element_rect(
+        fill = "#F2F4F7",
+        color = "#DDDDDD",
+        linewidth = 0.4
+      ),
+
+      strip.text = element_text(
+        face = "bold",
+        size = 9
+      ),
+
+      legend.position = "bottom",
+
+      legend.title = element_text(
+        face = "bold",
+        size = 9
+      ),
+
+      legend.text = element_text(
+        size = 9
+      ),
+
+      legend.key.width = grid::unit(1.3, "cm"),
+
+      panel.spacing = grid::unit(0.9, "lines"),
+
+      plot.margin = margin(12, 14, 12, 12)
+    )
+}
+
+
+# ============================================================
+# 4. HELPER FUNCTIONS
+# ============================================================
+
+# Consistent signal labels
+signal_name <- function(x) {
+  recode(
+    x,
+    "Temp" = "Temperature",
+    "Moist" = "Soil moisture"
+  )
+}
+
+# Consistent feedback labels
+feedback_name <- function(x) {
+  recode(
+    x,
+    "ack" = "ACK",
+    "no_ack" = "No-ACK"
+  )
+}
+
+# Consistent estimator labels
+estimator_name <- function(x) {
+  recode(
+    x,
+    "hold" = "Hold",
+    "weighted_drift" = "Weighted drift",
+    "local_linear" = "Local linear",
+    "full_drift" = "Full drift"
+  )
+}
+
+
+# ------------------------------------------------------------
+# Export helper
+# ------------------------------------------------------------
+
+save_figure <- function(plot, filename,
+                        width = 10, height = 7) {
+
+  ggsave(
+    filename = file.path(
+      output_dir,
+      paste0(filename, ".pdf")
+    ),
+    plot = plot,
+    width = width,
+    height = height,
+    units = "in",
+    device = cairo_pdf,
+    bg = "white"
+  )
+
+  ggsave(
+    filename = file.path(
+      output_dir,
+      paste0(filename, ".png")
+    ),
+    plot = plot,
+    width = width,
+    height = height,
+    units = "in",
+    dpi = 600,
+    bg = "white"
+  )
+
+  ggsave(
+    filename = file.path(
+      output_dir,
+      paste0(filename, ".tiff")
+    ),
+    plot = plot,
+    width = width,
+    height = height,
+    units = "in",
+    dpi = 600,
+    compression = "lzw",
+    bg = "white"
+  )
+
+  message("Saved: ", filename)
+}
+
+
+# ============================================================
+# GRAPH 1 - BASELINE VALIDATION
+# ============================================================
+
+# Convert to long format for three matched panels.
+# Original values remain unchanged.
+
+g1_sim <- g1 %>%
+  select(
+    threshold,
+    update_rate,
+    mean_aoi,
+    mse
+  ) %>%
+  pivot_longer(
+    cols = -threshold,
+    names_to = "metric",
+    values_to = "value"
+  ) %>%
+  mutate(type = "Simulation")
+
+
+g1_theory <- g1 %>%
+  select(
+    threshold,
+    theoretical_update_rate,
+    theoretical_mean_aoi,
+    theoretical_mse
+  ) %>%
+  rename(
+    update_rate = theoretical_update_rate,
+    mean_aoi = theoretical_mean_aoi,
+    mse = theoretical_mse
+  ) %>%
+  pivot_longer(
+    cols = -threshold,
+    names_to = "metric",
+    values_to = "value"
+  ) %>%
+  mutate(type = "Theory")
+
+
+g1_plot <- bind_rows(
+  g1_sim,
+  g1_theory
+) %>%
+  mutate(
+    metric = factor(
+      metric,
+      levels = c("update_rate", "mean_aoi", "mse"),
+      labels = c(
+        "A  Update rate",
+        "B  Mean AoI",
+        "C  Mean squared error"
+      )
+    )
+  )
+
+
+graph1 <- ggplot(
+  g1_plot,
+  aes(x = threshold, y = value)
+) +
+
+  geom_line(
+    data = filter(g1_plot, type == "Theory"),
+    aes(group = 1, linetype = type),
+    color = COL_GREY,
+    linewidth = 0.85
+  ) +
+
+  geom_point(
+    data = filter(g1_plot, type == "Simulation"),
+    aes(color = type),
+    size = 2.7
+  ) +
+
+  facet_wrap(
+    ~metric,
+    nrow = 1,
+    scales = "free_y"
+  ) +
+
+  scale_color_manual(
+    values = c("Simulation" = COL_BLUE)
+  ) +
+
+  scale_linetype_manual(
+    values = c("Theory" = "dashed")
+  ) +
+
+  scale_x_continuous(
+    breaks = sort(unique(g1$threshold))
+  ) +
+
+  labs(
+    x = "Threshold",
+    y = "Metric value",
+    color = NULL,
+    linetype = NULL
+  ) +
+
+  theme_publication() +
+
+  theme(
+    legend.position = "bottom"
+  )
+
+
+print(graph1)
+
+save_figure(
+  graph1,
+  "Graph_1_Baseline_Validation",
+  width = 11.5,
+  height = 4.0
+)
+
+
+# ============================================================
+# GRAPH 2 - ACCURACY VS PACKET LOSS
+# ============================================================
+
+# Use threshold_multiplier = 1.0.
+# This avoids mixing different threshold settings.
+# All original means and CI values are retained.
+
+selected_threshold <- 1.0
+
+g2_plot <- g2 %>%
+
+  filter(
+    near(threshold_multiplier, selected_threshold)
+  ) %>%
+
+  mutate(
+    loss_percent = loss_probability * 100,
+
+    Signal = signal_name(signal),
+
+    Feedback = feedback_name(feedback_model),
+
+    Estimator = estimator_name(estimator),
+
+    Estimator = factor(
+      Estimator,
+      levels = names(estimator_colors)
+    ),
+
+    Feedback = factor(
+      Feedback,
+      levels = c("ACK", "No-ACK")
+    ),
+
+    Signal = factor(
+      Signal,
+      levels = c("Temperature", "Soil moisture")
+    )
+  )
+
+
+graph2 <- ggplot(
+  g2_plot,
+  aes(
+    x = loss_percent,
+    y = mse_mean,
+    color = Estimator,
+    group = Estimator
+  )
+) +
+
+  geom_line(
+    linewidth = 0.85
+  ) +
+
+  geom_point(
+    size = 2.1
+  ) +
+
+  geom_errorbar(
+    aes(
+      ymin = mse_ci_low,
+      ymax = mse_ci_high
+    ),
+    width = 1.2,
+    linewidth = 0.4,
+    alpha = 0.65
+  ) +
+
+  facet_grid(
+    Signal ~ Feedback,
+    scales = "free_y"
+  ) +
+
+  scale_color_manual(
+    values = estimator_colors
+  ) +
+
+  scale_x_continuous(
+    breaks = seq(0, 50, by = 10),
+    expand = expansion(mult = c(0.04, 0.04))
+  ) +
+
+  scale_y_continuous(
+    labels = label_number(accuracy = 0.01)
+  ) +
+
+  labs(
+    x = "Packet loss probability (%)",
+    y = "Mean squared error (MSE)",
+    color = "Estimator"
+  ) +
+
+  theme_publication()
+
+
+print(graph2)
+
+save_figure(
+  graph2,
+  "Graph_2_Accuracy_vs_Packet_Loss",
+  width = 10.5,
+  height = 7.5
+)
+
+
+# ============================================================
+# GRAPH 3 - WEIGHTED-DRIFT IMPROVEMENT
+# ============================================================
+
+# Positive improvement = weighted drift performs better
+# than hold, according to the saved CSV definition.
+#
+# Significance uses ORIGINAL BH-adjusted q-values.
+# No p-values or q-values are recalculated.
+
+g3_plot <- g3 %>%
+
+  mutate(
+    loss_percent = loss_probability * 100,
+
+    Signal = signal_name(signal),
+
+    Feedback = feedback_name(feedback_model),
+
+    significance = ifelse(
+      !is.na(q_value) & q_value < 0.05,
+      "*",
+      ""
+    ),
+
+    Signal = factor(
+      Signal,
+      levels = c("Temperature", "Soil moisture")
+    ),
+
+    Feedback = factor(
+      Feedback,
+      levels = c("ACK", "No-ACK")
+    )
+  )
+
+
+# Symmetric limits, ensuring that zero is at the
+# center of the color scale.
+
+heat_limit <- max(
+  abs(g3_plot$aggregate_relative_improvement_percent),
+  na.rm = TRUE
+)
+
+
+graph3 <- ggplot(
+  g3_plot,
+  aes(
+    x = factor(loss_percent),
+    y = factor(threshold_multiplier),
+    fill = aggregate_relative_improvement_percent
+  )
+) +
+
+  geom_tile(
+    color = "white",
+    linewidth = 0.65
+  ) +
+
+  geom_text(
+    aes(label = significance),
+    fontface = "bold",
+    color = "#111111",
+    size = 5.2
+  ) +
+
+  facet_grid(
+    Signal ~ Feedback
+  ) +
+
+  scale_fill_gradient2(
+    low = "#B2182B",
+    mid = "#FFFFFF",
+    high = "#2166AC",
+    midpoint = 0,
+    limits = c(-heat_limit, heat_limit),
+    name = "Relative MSE\nimprovement (%)"
+  ) +
+
+  labs(
+    x = "Packet loss probability (%)",
+    y = "Threshold multiplier"
+  ) +
+
+  theme_publication() +
+
+  theme(
+    panel.grid = element_blank(),
+    panel.spacing = grid::unit(1.1, "lines"),
+    legend.position = "right"
+  )
+
+
+print(graph3)
+
+save_figure(
+  graph3,
+  "Graph_3_Weighted_Drift_Improvement",
+  width = 10,
+  height = 7.2
+)
+
+
+# ============================================================
+# GRAPH 4 - ACCURACY, FRESHNESS, COMMUNICATION
+# ============================================================
+
+# All loss probabilities are retained.
+# Points are connected in THRESHOLD ORDER.
+#
+# geom_path() is intentionally used instead of
+# geom_line(), because geom_line() sorts by x.
+#
+# Upper: MSE (Hold and Weighted drift)
+# Lower: AoI (Hold only, avoiding duplicate values)
+
+
+g4_plot <- g4 %>%
+  mutate(
+    Signal = signal_name(signal),
+
+    Feedback = feedback_name(feedback_model),
+
+    Estimator = estimator_name(estimator),
+
+    Loss = factor(
+      paste0(
+        round(loss_probability * 100),
+        "% loss"
+      ),
+      levels = paste0(
+        round(sort(unique(g4$loss_probability)) * 100),
+        "% loss"
+      )
+    )
+  )
+
+
+# ------------------------------------------------------------
+# Upper panels: accuracy
+# ------------------------------------------------------------
+
+g4_mse_data <- g4_plot %>%
+
+  arrange(
+    Signal,
+    Loss,
+    Feedback,
+    Estimator,
+    threshold_multiplier
+  )
+
+
+g4_mse <- ggplot(
+  g4_mse_data,
+  aes(
+    x = attempted_update_rate_per_minute_mean,
+    y = mse_mean,
+    color = Feedback,
+    linetype = Estimator,
+    group = interaction(
+      Signal,
+      Loss,
+      Feedback,
+      Estimator
+    )
+  )
+) +
+
+  geom_path(
+    linewidth = 0.75
+  ) +
+
+  geom_point(
+    size = 1.55
+  ) +
+
+  facet_grid(
+    Signal ~ Loss,
+    scales = "free_y"
+  ) +
+
+  scale_color_manual(
+    values = feedback_colors
+  ) +
+
+  scale_linetype_manual(
+    values = c(
+      "Hold" = "solid",
+      "Weighted drift" = "dashed"
+    )
+  ) +
+
+  labs(
+    title = "A  Estimation accuracy",
+    x = "Attempted updates (packets/min)",
+    y = "Mean squared error",
+    color = "Feedback",
+    linetype = "Estimator"
+  ) +
+
+  theme_publication(base_size = 10) +
+
+  theme(
+    axis.text.x = element_text(
+      angle = 40,
+      hjust = 1
+    ),
+    strip.text = element_text(size = 8)
+  )
+
+
+# ------------------------------------------------------------
+# Lower panels: freshness
+# IMPORTANT: hold only
+# ------------------------------------------------------------
+
+g4_aoi_data <- g4_plot %>%
+
+  filter(estimator == "hold") %>%
+
+  arrange(
+    Signal,
+    Loss,
+    Feedback,
+    threshold_multiplier
+  )
+
+
+g4_aoi <- ggplot(
+  g4_aoi_data,
+  aes(
+    x = attempted_update_rate_per_minute_mean,
+    y = mean_aoi_minutes_mean,
+    color = Feedback,
+    group = interaction(
+      Signal,
+      Loss,
+      Feedback
+    )
+  )
+) +
+
+  geom_path(
+    linewidth = 0.75
+  ) +
+
+  geom_point(
+    size = 1.55
+  ) +
+
+  facet_grid(
+    Signal ~ Loss,
+    scales = "free_y"
+  ) +
+
+  scale_color_manual(
+    values = feedback_colors
+  ) +
+
+  labs(
+    title = "B  Information freshness",
+    x = "Attempted updates (packets/min)",
+    y = "Mean AoI (minutes)",
+    color = "Feedback"
+  ) +
+
+  theme_publication(base_size = 10) +
+
+  theme(
+    axis.text.x = element_text(
+      angle = 40,
+      hjust = 1
+    ),
+    strip.text = element_text(size = 8)
+  )
+
+
+# ------------------------------------------------------------
+# Combine accuracy and freshness vertically
+# ------------------------------------------------------------
+
+graph4 <- (
+  g4_mse / g4_aoi
+) +
+
+  plot_layout(
+    heights = c(1, 1),
+    guides = "collect"
+  ) &
+
+  theme(
+    legend.position = "bottom"
+  )
+
+
+print(graph4)
+
+save_figure(
+  graph4,
+  "Graph_4_Accuracy_Freshness_Communication",
+  width = 17,
+  height = 10.5
+)
+
+
+# ============================================================
+# GRAPH 5 - DEADLINE FRESHNESS VIOLATIONS
+# ============================================================
+
+# Select threshold_multiplier = 1.0
+# Keep three deadline multipliers: 2, 3 and 6.
+#
+# Original CIs are multiplied by 100 for plotting.
+# No confidence interval is recomputed.
+
+g5_plot <- g5 %>%
+
+  filter(
+    near(threshold_multiplier, selected_threshold),
+    freshness_deadline_multiplier %in% c(2, 3, 6)
+  ) %>%
+
+  mutate(
+    loss_percent = loss_probability * 100,
+
+    violation_percent =
+      freshness_violation_rate_mean * 100,
+
+    violation_ci_low =
+      freshness_violation_rate_ci_low * 100,
+
+    violation_ci_high =
+      freshness_violation_rate_ci_high * 100,
+
+    Signal = signal_name(signal),
+
+    Feedback = feedback_name(feedback_model),
+
+    Deadline = factor(
+      freshness_deadline_multiplier,
+      levels = c(2, 3, 6),
+      labels = c("2x", "3x", "6x")
+    ),
+
+    Signal = factor(
+      Signal,
+      levels = c("Temperature", "Soil moisture")
+    ),
+
+    Feedback = factor(
+      Feedback,
+      levels = c("ACK", "No-ACK")
+    )
+  )
+
+
+graph5 <- ggplot(
+  g5_plot,
+  aes(
+    x = loss_percent,
+    y = violation_percent,
+    color = Deadline,
+    group = Deadline
+  )
+) +
+
+  geom_line(
+    linewidth = 0.9
+  ) +
+
+  geom_point(
+    size = 2.1
+  ) +
+
+  geom_errorbar(
+    aes(
+      ymin = violation_ci_low,
+      ymax = violation_ci_high
+    ),
+    width = 1.1,
+    linewidth = 0.4,
+    alpha = 0.7
+  ) +
+
+  facet_grid(
+    Signal ~ Feedback
+  ) +
+
+  scale_color_manual(
+    values = deadline_colors
+  ) +
+
+  scale_x_continuous(
+    breaks = seq(0, 50, by = 10)
+  ) +
+
+  scale_y_continuous(
+    labels = label_number(accuracy = 1),
+    limits = c(0, 100)
+  ) +
+
+  labs(
+    x = "Packet loss probability (%)",
+    y = "Freshness violation rate (%)",
+    color = "Deadline multiplier"
+  ) +
+
+  theme_publication()
+
+
+print(graph5)
+
+save_figure(
+  graph5,
+  "Graph_5_Deadline_Freshness_Violations",
+  width = 10.5,
+  height = 7.5
+)
+
+
+# ============================================================
+# 5. FINAL VERIFICATION
+# ============================================================
+
+cat("\n")
+cat("========================================\n")
+cat("PUBLICATION FIGURES COMPLETED\n")
+cat("========================================\n")
+
+cat("\nWorking directory:\n")
+cat(data_dir, "\n")
+
+cat("\nOutput directory:\n")
+cat(output_dir, "\n")
+
+cat("\nOriginal rows loaded:\n")
+cat("Graph 1:", nrow(g1), "\n")
+cat("Graph 2:", nrow(g2), "\n")
+cat("Graph 3:", nrow(g3), "\n")
+cat("Graph 4:", nrow(g4), "\n")
+cat("Graph 5:", nrow(g5), "\n")
+
+cat("\nPlot rows used:\n")
+cat("Graph 2:", nrow(g2_plot), "\n")
+cat("Graph 3:", nrow(g3_plot), "\n")
+cat("Graph 4 MSE:", nrow(g4_mse_data), "\n")
+cat("Graph 4 AoI:", nrow(g4_aoi_data), "\n")
+cat("Graph 5:", nrow(g5_plot), "\n")
+
+cat("\nFiles created:\n")
+
+print(
+  list.files(
+    output_dir,
+    pattern = "\\.(pdf|png|tiff)$",
+    full.names = FALSE
+  )
+)
+
+cat("\n")
+cat("All original statistical values preserved.\n")
+cat("No confidence intervals recalculated.\n")
+cat("No adjusted p-values recalculated.\n")
+cat("========================================\n")
+
+```

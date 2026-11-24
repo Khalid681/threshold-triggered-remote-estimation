@@ -1,0 +1,1438 @@
+---
+title: "kHALID ANALYSIS"
+author: "umar Aziz"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# Required packages: readr, ggplot2, dplyr, tidyr, patchwork, scales.
+```
+
+```{r baseline-validation, include=FALSE}
+# ============================================================
+# GRAPH 1: BASELINE VALIDATION
+# ============================================================
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(patchwork)
+
+# ============================================================
+# LOAD DATA
+# ============================================================
+
+df <- read_csv(
+  "Graph_1_Baseline_Validation.csv",
+  show_col_types = FALSE
+)
+
+# Check data
+View(df)
+
+# ============================================================
+# PUBLICATION THEME
+# ============================================================
+
+theme_pub <- theme_classic(base_size = 12) +
+  theme(
+    axis.title = element_text(
+      size = 12,
+      face = "bold"
+    ),
+    
+    axis.text = element_text(
+      size = 10,
+      colour = "black"
+    ),
+    
+    plot.title = element_text(
+      size = 12,
+      face = "bold",
+      hjust = 0
+    ),
+    
+    legend.title = element_blank(),
+    
+    legend.text = element_text(
+      size = 10
+    ),
+    
+    legend.position = "top",
+    
+    panel.border = element_rect(
+      colour = "black",
+      fill = NA,
+      linewidth = 0.6
+    ),
+    
+    plot.margin = margin(6, 6, 6, 6)
+  )
+
+
+# ============================================================
+# PANEL A: UPDATE RATE
+# ============================================================
+
+p1 <- ggplot(df, aes(x = threshold)) +
+  
+  # Theoretical curve
+  geom_line(
+    aes(
+      y = theoretical_update_rate,
+      linetype = "Theory"
+    ),
+    linewidth = 0.9
+  ) +
+  
+  # Simulation values
+  geom_point(
+    aes(
+      y = update_rate,
+      shape = "Simulation"
+    ),
+    size = 2.7
+  ) +
+  
+  scale_linetype_manual(
+    values = c(
+      "Theory" = "dashed"
+    )
+  ) +
+  
+  scale_shape_manual(
+    values = c(
+      "Simulation" = 16
+    )
+  ) +
+  
+  labs(
+    title = "(a) Update rate",
+    x = "Threshold",
+    y = "Update rate"
+  ) +
+  
+  theme_pub
+
+
+# ============================================================
+# PANEL B: MEAN AoI
+# ============================================================
+
+p2 <- ggplot(df, aes(x = threshold)) +
+  
+  # Theoretical curve
+  geom_line(
+    aes(
+      y = theoretical_mean_aoi,
+      linetype = "Theory"
+    ),
+    linewidth = 0.9
+  ) +
+  
+  # Simulation values
+  geom_point(
+    aes(
+      y = mean_aoi,
+      shape = "Simulation"
+    ),
+    size = 2.7
+  ) +
+  
+  scale_linetype_manual(
+    values = c(
+      "Theory" = "dashed"
+    )
+  ) +
+  
+  scale_shape_manual(
+    values = c(
+      "Simulation" = 16
+    )
+  ) +
+  
+  labs(
+    title = "(b) Mean AoI",
+    x = "Threshold",
+    y = "Mean AoI"
+  ) +
+  
+  theme_pub
+
+
+# ============================================================
+# PANEL C: MSE
+# ============================================================
+
+p3 <- ggplot(df, aes(x = threshold)) +
+  
+  # Theoretical curve
+  geom_line(
+    aes(
+      y = theoretical_mse,
+      linetype = "Theory"
+    ),
+    linewidth = 0.9
+  ) +
+  
+  # Simulation values
+  geom_point(
+    aes(
+      y = mse,
+      shape = "Simulation"
+    ),
+    size = 2.7
+  ) +
+  
+  scale_linetype_manual(
+    values = c(
+      "Theory" = "dashed"
+    )
+  ) +
+  
+  scale_shape_manual(
+    values = c(
+      "Simulation" = 16
+    )
+  ) +
+  
+  labs(
+    title = "(c) MSE",
+    x = "Threshold",
+    y = "MSE"
+  ) +
+  
+  theme_pub
+
+
+# ============================================================
+# COMBINE ALL THREE PANELS
+# ============================================================
+
+graph1 <- (p1 | p2 | p3) +
+  plot_layout(
+    guides = "collect"
+  ) &
+  theme(
+    legend.position = "top"
+  )
+
+
+# Display graph
+graph1
+
+
+# ============================================================
+# SAVE HIGH-QUALITY PNG
+# ============================================================
+
+ggsave(
+  filename =
+    "Graph_1_Baseline_Validation.png",
+  
+  plot = graph1,
+  
+  width = 10,
+  height = 3.6,
+  units = "in",
+  dpi = 600,
+  bg = "white"
+)
+
+
+# ============================================================
+# SAVE VECTOR PDF
+# ============================================================
+
+ggsave(
+  filename =
+    "Graph_1_Baseline_Validation.pdf",
+  
+  plot = graph1,
+  
+  width = 10,
+  height = 3.6,
+  units = "in"
+)
+```
+
+
+```{r accuracy-vs-packet-loss, include=FALSE}
+# ============================================================
+# GRAPH 2: ACCURACY VERSUS PACKET LOSS
+# ============================================================
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+
+# ============================================================
+# LOAD DATA
+# ============================================================
+
+df <- read_csv(
+  "Graph_2_Accuracy_vs_Packet_Loss.csv",
+  show_col_types = FALSE
+)
+
+View(df)
+
+# ============================================================
+# PREPARE DATA FOR PLOTTING
+# No MSE or CI values are recalculated
+# ============================================================
+
+df <- df %>%
+  mutate(
+    loss_percent = loss_probability * 100,
+
+    signal_label = recode(
+      signal,
+      "Temp" = "Temperature",
+      "Moist" = "Soil moisture"
+    ),
+
+    feedback_label = recode(
+      feedback_model,
+      "ack" = "ACK",
+      "no_ack" = "No ACK"
+    ),
+
+    estimator = factor(
+      estimator,
+      levels = c(
+        "hold",
+        "weighted_drift",
+        "local_linear",
+        "full_drift"
+      ),
+      labels = c(
+        "Hold",
+        "Weighted drift",
+        "Local linear",
+        "Full drift"
+      )
+    )
+  )
+
+
+# ============================================================
+# CREATE GRAPH
+# ============================================================
+
+graph2 <- ggplot(
+  df,
+  aes(
+    x = loss_percent,
+    y = mse_mean,
+    colour = estimator,
+    shape = estimator,
+    group = estimator
+  )
+) +
+
+  # Connecting lines
+  geom_line(
+    linewidth = 0.85
+  ) +
+
+  # Saved confidence intervals
+  geom_errorbar(
+    aes(
+      ymin = mse_ci_low,
+      ymax = mse_ci_high
+    ),
+    width = 1.0,
+    linewidth = 0.45,
+    alpha = 0.8
+  ) +
+
+  # Simulation points
+  geom_point(
+    size = 2.5,
+    stroke = 0.7
+  ) +
+
+  # Four requested panels:
+  # Temperature ACK / No ACK
+  # Soil moisture ACK / No ACK
+  facet_grid(
+    signal_label ~ feedback_label,
+    scales = "free_y"
+  ) +
+
+  # Publication-friendly colour-blind-safe palette
+  scale_colour_manual(
+    values = c(
+      "Hold" = "#0072B2",
+      "Weighted drift" = "#D55E00",
+      "Local linear" = "#009E73",
+      "Full drift" = "#CC79A7"
+    )
+  ) +
+
+  # Shapes make the graph interpretable even in grayscale
+  scale_shape_manual(
+    values = c(
+      "Hold" = 16,
+      "Weighted drift" = 17,
+      "Local linear" = 15,
+      "Full drift" = 18
+    )
+  ) +
+
+  scale_x_continuous(
+    breaks = seq(0, 50, 10),
+    expand = expansion(
+      mult = c(0.02, 0.04)
+    )
+  ) +
+
+  labs(
+    x = "Packet loss probability (%)",
+    y = "Mean squared error (MSE)",
+    colour = "Estimator",
+    shape = "Estimator"
+  ) +
+
+  theme_classic(
+    base_size = 12
+  ) +
+
+  theme(
+
+    # Axis titles
+    axis.title = element_text(
+      size = 12,
+      face = "bold"
+    ),
+
+    # Axis numbers
+    axis.text = element_text(
+      size = 10,
+      colour = "black"
+    ),
+
+    # Panel header background
+    strip.background = element_rect(
+      fill = "grey95",
+      colour = "black",
+      linewidth = 0.6
+    ),
+
+    # Panel header text
+    strip.text = element_text(
+      size = 11,
+      face = "bold",
+      colour = "black"
+    ),
+
+    # Legend
+    legend.position = "top",
+
+    legend.title = element_text(
+      size = 11,
+      face = "bold"
+    ),
+
+    legend.text = element_text(
+      size = 10
+    ),
+
+    # Panel border
+    panel.border = element_rect(
+      colour = "black",
+      fill = NA,
+      linewidth = 0.6
+    ),
+
+    # Clean margins
+    plot.margin = margin(
+      8, 8, 8, 8
+    )
+  )
+
+
+# ============================================================
+# DISPLAY GRAPH
+# ============================================================
+
+graph2
+
+
+# ============================================================
+# SAVE HIGH-RESOLUTION PNG
+# ============================================================
+
+ggsave(
+  filename =
+    "Graph_2_Accuracy_vs_Packet_Loss.png",
+
+  plot = graph2,
+
+  width = 8.5,
+  height = 6.5,
+  units = "in",
+
+  dpi = 600,
+  bg = "white"
+)
+
+
+# ============================================================
+# SAVE VECTOR PDF
+# ============================================================
+
+ggsave(
+  filename =
+    "Graph_2_Accuracy_vs_Packet_Loss.pdf",
+
+  plot = graph2,
+
+  width = 8.5,
+  height = 6.5,
+  units = "in"
+)
+```
+
+
+```{r weighted-drift-improvement, include=FALSE}
+# ============================================================
+# GRAPH 3: WEIGHTED-DRIFT IMPROVEMENT
+# FINAL PUBLICATION VERSION
+# ============================================================
+
+# ------------------------------------------------------------
+# 1. LOAD PACKAGES
+# ------------------------------------------------------------
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+
+
+# ------------------------------------------------------------
+# 2. LOAD DATA
+# ------------------------------------------------------------
+
+df <- read_csv(
+  "Graph_3_Weighted_Drift_Improvement.csv",
+  show_col_types = FALSE
+)
+
+
+# ------------------------------------------------------------
+# 3. PREPARE DATA
+#
+# IMPORTANT:
+# - Original improvement values are NOT changed.
+# - Original q-values are NOT changed.
+# - Packet loss is multiplied by 100 only for display.
+# ------------------------------------------------------------
+
+df <- df %>%
+  mutate(
+
+    # Convert probability to percentage for x-axis
+    loss_percent = loss_probability * 100,
+
+    # Clean signal labels
+    signal_label = recode(
+      signal,
+      "Temp"  = "Temperature",
+      "Moist" = "Soil moisture"
+    ),
+
+    # Clean feedback labels
+    feedback_label = recode(
+      feedback_model,
+      "ack"    = "ACK",
+      "no_ack" = "No ACK"
+    ),
+
+    # Asterisk based on SAVED adjusted q-value
+    significance = ifelse(
+      !is.na(q_value) & q_value < 0.05,
+      "*",
+      ""
+    )
+  )
+
+
+# ------------------------------------------------------------
+# 4. CHECK SIGNIFICANT RESULTS
+#
+# This lets you verify exactly which cells receive *
+# ------------------------------------------------------------
+
+significant_cells <- df %>%
+  filter(!is.na(q_value) & q_value < 0.05) %>%
+  select(
+    signal,
+    feedback_model,
+    loss_probability,
+    threshold_multiplier,
+    aggregate_relative_improvement_percent,
+    q_value
+  )
+
+print(significant_cells)
+
+
+# ------------------------------------------------------------
+# 5. CHECK MISSING IMPROVEMENT VALUES
+#
+# These cells will appear gray in the heatmap.
+# ------------------------------------------------------------
+
+missing_cells <- df %>%
+  filter(is.na(aggregate_relative_improvement_percent))
+
+print(missing_cells)
+
+
+# ------------------------------------------------------------
+# 6. CREATE SYMMETRIC COLOR LIMIT
+#
+# Equal positive and negative values receive equal color
+# intensity around zero.
+# ------------------------------------------------------------
+
+colour_limit <- max(
+  abs(df$aggregate_relative_improvement_percent),
+  na.rm = TRUE
+)
+
+
+# ------------------------------------------------------------
+# 7. CREATE HEATMAP
+# ------------------------------------------------------------
+
+graph3 <- ggplot(
+  df,
+  aes(
+    x = factor(loss_percent),
+    y = factor(threshold_multiplier)
+  )
+) +
+
+  # Heatmap cells
+  geom_tile(
+    aes(
+      fill = aggregate_relative_improvement_percent
+    ),
+    colour = "white",
+    linewidth = 0.6
+  ) +
+
+  # Statistical significance marker
+  # * means adjusted q-value < 0.05
+  geom_text(
+    aes(
+      label = significance
+    ),
+    colour = "black",
+    size = 5,
+    fontface = "bold"
+  ) +
+
+  # Four panels:
+  # Soil moisture / ACK
+  # Soil moisture / No ACK
+  # Temperature / ACK
+  # Temperature / No ACK
+  facet_grid(
+    signal_label ~ feedback_label
+  ) +
+
+  # ----------------------------------------------------------
+  # DIVERGING COLOR SCALE
+  #
+  # Blue  = negative relative improvement
+  # White = approximately zero
+  # Red   = positive relative improvement
+  # Gray  = missing/not available
+  # ----------------------------------------------------------
+
+  scale_fill_gradient2(
+    low = "#2166AC",
+    mid = "white",
+    high = "#B2182B",
+
+    midpoint = 0,
+
+    limits = c(
+      -colour_limit,
+      colour_limit
+    ),
+
+    oob = squish,
+
+    na.value = "grey60",
+
+    name = "Relative\nimprovement (%)"
+  ) +
+
+  # ----------------------------------------------------------
+  # AXIS AND CAPTION
+  # ----------------------------------------------------------
+
+  labs(
+    x = "Packet loss probability (%)",
+    y = "Threshold multiplier",
+
+    caption = paste0(
+      "* Adjusted q-value < 0.05. ",
+      "Gray cells indicate unavailable relative-improvement values."
+    )
+  ) +
+
+  # ----------------------------------------------------------
+  # PUBLICATION THEME
+  # ----------------------------------------------------------
+
+  theme_classic(
+    base_size = 12
+  ) +
+
+  theme(
+
+    # Axis titles
+    axis.title.x = element_text(
+      size = 12,
+      face = "bold",
+      margin = margin(t = 8)
+    ),
+
+    axis.title.y = element_text(
+      size = 12,
+      face = "bold",
+      margin = margin(r = 8)
+    ),
+
+    # Axis numbers
+    axis.text = element_text(
+      size = 10,
+      colour = "black"
+    ),
+
+    # Facet headers
+    strip.background = element_rect(
+      fill = "grey95",
+      colour = "black",
+      linewidth = 0.6
+    ),
+
+    strip.text = element_text(
+      size = 11,
+      face = "bold",
+      colour = "black"
+    ),
+
+    # Color legend
+    legend.position = "right",
+
+    legend.title = element_text(
+      size = 10,
+      face = "bold"
+    ),
+
+    legend.text = element_text(
+      size = 9
+    ),
+
+    # Caption explaining *
+    plot.caption = element_text(
+      size = 9,
+      colour = "black",
+      hjust = 0,
+      margin = margin(t = 10)
+    ),
+
+    # Panel border
+    panel.border = element_rect(
+      colour = "black",
+      fill = NA,
+      linewidth = 0.6
+    ),
+
+    # No unnecessary grid
+    panel.grid = element_blank(),
+
+    # Figure margins
+    plot.margin = margin(
+      10, 10, 10, 10
+    )
+  )
+
+
+# ------------------------------------------------------------
+# 8. DISPLAY FINAL GRAPH
+# ------------------------------------------------------------
+
+print(graph3)
+
+
+# ------------------------------------------------------------
+# 9. SAVE HIGH-RESOLUTION PNG
+# ------------------------------------------------------------
+
+ggsave(
+  filename =
+    "Graph_3_Weighted_Drift_Improvement.png",
+
+  plot = graph3,
+
+  width = 9,
+  height = 7,
+  units = "in",
+
+  dpi = 600,
+  bg = "white"
+)
+
+
+# ------------------------------------------------------------
+# 10. SAVE VECTOR PDF
+# ------------------------------------------------------------
+
+ggsave(
+  filename =
+    "Graph_3_Weighted_Drift_Improvement.pdf",
+
+  plot = graph3,
+
+  width = 9,
+  height = 7,
+  units = "in"
+)
+```
+
+
+```{r accuracy-freshness-communication, include=FALSE}
+# ============================================================
+# GRAPH 4: ACCURACY-FRESHNESS-COMMUNICATION TRADE-OFF
+# FINAL PUBLICATION VERSION
+# ============================================================
+
+# ------------------------------------------------------------
+# 1. LOAD PACKAGES
+# ------------------------------------------------------------
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+
+
+# ------------------------------------------------------------
+# 2. LOAD DATA
+# ------------------------------------------------------------
+
+df <- read_csv(
+  "Graph_4_Accuracy_Freshness_Communication.csv",
+  show_col_types = FALSE
+)
+
+View(df)
+
+
+# ------------------------------------------------------------
+# 3. PREPARE DATA
+# Original numerical values are NOT changed
+# ------------------------------------------------------------
+
+df <- df %>%
+  mutate(
+
+    signal_label = recode(
+      signal,
+      "Temp"  = "Temperature",
+      "Moist" = "Soil moisture"
+    ),
+
+    feedback_label = recode(
+      feedback_model,
+      "ack"    = "ACK",
+      "no_ack" = "No ACK"
+    ),
+
+    estimator_label = recode(
+      estimator,
+      "hold"           = "Hold",
+      "weighted_drift" = "Weighted drift"
+    ),
+
+    # Fix order for consistent plotting/legend
+    feedback_label = factor(
+      feedback_label,
+      levels = c("ACK", "No ACK")
+    ),
+
+    estimator_label = factor(
+      estimator_label,
+      levels = c("Hold", "Weighted drift")
+    )
+  ) %>%
+
+  # IMPORTANT:
+  # Points are connected in threshold order
+  arrange(
+    signal,
+    feedback_model,
+    estimator,
+    threshold_multiplier
+  )
+
+
+# ------------------------------------------------------------
+# 4. PUBLICATION THEME
+# ------------------------------------------------------------
+
+theme_pub <- theme_classic(base_size = 12) +
+
+  theme(
+
+    axis.title = element_text(
+      size = 12,
+      face = "bold"
+    ),
+
+    axis.text = element_text(
+      size = 10,
+      colour = "black"
+    ),
+
+    strip.background = element_rect(
+      fill = "grey95",
+      colour = "black",
+      linewidth = 0.6
+    ),
+
+    strip.text = element_text(
+      size = 11,
+      face = "bold",
+      colour = "black"
+    ),
+
+    legend.position = "top",
+
+    legend.title = element_text(
+      size = 10,
+      face = "bold"
+    ),
+
+    legend.text = element_text(
+      size = 10
+    ),
+
+    panel.border = element_rect(
+      colour = "black",
+      fill = NA,
+      linewidth = 0.6
+    ),
+
+    panel.grid = element_blank(),
+
+    plot.margin = margin(
+      6, 8, 6, 8
+    )
+  )
+
+
+# ============================================================
+# 5. UPPER PANELS: MSE
+# ============================================================
+
+p_mse <- ggplot(
+  df,
+  aes(
+    x = attempted_update_rate_per_minute_mean,
+    y = mse_mean,
+
+    # ACK / No ACK by colour
+    colour = feedback_label,
+
+    # Hold / Weighted drift by line style
+    linetype = estimator_label,
+
+    group = interaction(
+      feedback_label,
+      estimator_label
+    )
+  )
+) +
+
+  # Connect observations in threshold order
+  geom_line(
+    linewidth = 0.9
+  ) +
+
+  # Data points
+  geom_point(
+    size = 2.5
+  ) +
+
+  # Temperature and soil moisture panels
+  facet_wrap(
+    ~ signal_label,
+    scales = "free_y",
+    nrow = 1
+  ) +
+
+  # ----------------------------------------------------------
+  # COLOR-BLIND-SAFE COLORS
+  # ----------------------------------------------------------
+
+  scale_colour_manual(
+    values = c(
+      "ACK"    = "#0072B2",
+      "No ACK" = "#D55E00"
+    )
+  ) +
+
+  # ----------------------------------------------------------
+  # LINE TYPES
+  # ----------------------------------------------------------
+
+  scale_linetype_manual(
+    values = c(
+      "Hold"           = "solid",
+      "Weighted drift" = "dashed"
+    )
+  ) +
+
+  labs(
+    x = NULL,
+    y = "Mean squared error (MSE)",
+    colour = "Feedback",
+    linetype = "Estimator"
+  ) +
+
+  theme_pub
+
+
+# ============================================================
+# 6. LOWER PANELS: MEAN AoI
+#
+# IMPORTANT:
+# Only HOLD is used here because AoI/channel results are
+# repeated across estimators in the CSV.
+# ============================================================
+
+df_aoi <- df %>%
+
+  filter(
+    estimator == "hold"
+  ) %>%
+
+  arrange(
+    signal,
+    feedback_model,
+    threshold_multiplier
+  )
+
+
+p_aoi <- ggplot(
+  df_aoi,
+  aes(
+    x = attempted_update_rate_per_minute_mean,
+    y = mean_aoi_minutes_mean,
+
+    colour = feedback_label,
+
+    group = feedback_label
+  )
+) +
+
+  geom_line(
+    linewidth = 0.9
+  ) +
+
+  geom_point(
+    size = 2.5
+  ) +
+
+  facet_wrap(
+    ~ signal_label,
+    scales = "free_y",
+    nrow = 1
+  ) +
+
+  # Same ACK / No ACK colors as upper panels
+  scale_colour_manual(
+    values = c(
+      "ACK"    = "#0072B2",
+      "No ACK" = "#D55E00"
+    )
+  ) +
+
+  labs(
+    x = "Attempted update rate (packets/min)",
+    y = "Mean AoI (min)",
+    colour = "Feedback"
+  ) +
+
+  theme_pub
+
+
+# ============================================================
+# 7. COMBINE UPPER AND LOWER PANELS
+# ============================================================
+
+graph4 <- p_mse / p_aoi +
+
+  plot_layout(
+    heights = c(1, 1),
+    guides = "collect"
+  ) &
+
+  theme(
+    legend.position = "top"
+  )
+
+
+# ============================================================
+# 8. DISPLAY GRAPH
+# ============================================================
+
+print(graph4)
+
+
+# ============================================================
+# 9. SAVE HIGH-RESOLUTION PNG
+# ============================================================
+
+ggsave(
+  filename =
+    "Graph_4_Accuracy_Freshness_Communication.png",
+
+  plot = graph4,
+
+  width = 9,
+  height = 7,
+  units = "in",
+
+  dpi = 600,
+  bg = "white"
+)
+
+
+# ============================================================
+# 10. SAVE VECTOR PDF
+# ============================================================
+
+ggsave(
+  filename =
+    "Graph_4_Accuracy_Freshness_Communication.pdf",
+
+  plot = graph4,
+
+  width = 9,
+  height = 7,
+  units = "in"
+)
+```
+
+
+
+```{r deadline-freshness-violations, include=FALSE}
+# ============================================================
+# GRAPH 5: DEADLINE FRESHNESS VIOLATIONS
+# FINAL PUBLICATION VERSION
+# ============================================================
+
+# ------------------------------------------------------------
+# 1. LOAD PACKAGES
+# ------------------------------------------------------------
+
+library(readr)
+library(ggplot2)
+library(dplyr)
+
+
+# ------------------------------------------------------------
+# 2. LOAD DATA
+# ------------------------------------------------------------
+
+df <- read_csv(
+  "Graph_5_Deadline_Freshness_Violations.csv",
+  show_col_types = FALSE
+)
+
+View(df)
+
+
+# ------------------------------------------------------------
+# 3. PREPARE DATA
+#
+# IMPORTANT:
+# Original mean and confidence intervals are NOT recalculated.
+# Multiplication by 100 is only to display them as percentages.
+# ------------------------------------------------------------
+
+df <- df %>%
+
+  # Keep only requested deadline multipliers
+  filter(
+    freshness_deadline_multiplier %in% c(2, 3, 6)
+  ) %>%
+
+  mutate(
+
+    # Packet loss as percentage
+    loss_percent =
+      loss_probability * 100,
+
+    # Freshness violation rate as percentage
+    violation_percent =
+      freshness_violation_rate_mean * 100,
+
+    # Confidence intervals as percentages
+    violation_ci_low_percent =
+      freshness_violation_rate_ci_low * 100,
+
+    violation_ci_high_percent =
+      freshness_violation_rate_ci_high * 100,
+
+    # Deadline labels
+    deadline = factor(
+      freshness_deadline_multiplier,
+      levels = c(2, 3, 6),
+      labels = c("2×", "3×", "6×")
+    ),
+
+    # Signal labels
+    signal_label = recode(
+      signal,
+      "Temp"  = "Temperature",
+      "Moist" = "Soil moisture"
+    ),
+
+    # Feedback labels
+    feedback_label = recode(
+      feedback_model,
+      "ack"    = "ACK",
+      "no_ack" = "No ACK"
+    )
+  ) %>%
+
+  # Ensure points are connected in packet-loss order
+  arrange(
+    signal,
+    feedback_model,
+    freshness_deadline_multiplier,
+    loss_probability
+  )
+
+
+# ------------------------------------------------------------
+# 4. CREATE GRAPH
+# ------------------------------------------------------------
+
+graph5 <- ggplot(
+  df,
+  aes(
+    x = loss_percent,
+    y = violation_percent,
+
+    colour = deadline,
+    shape = deadline,
+    linetype = deadline,
+
+    group = deadline
+  )
+) +
+
+  # Connecting curves
+  geom_line(
+    linewidth = 0.9
+  ) +
+
+  # Saved confidence intervals
+  geom_errorbar(
+    aes(
+      ymin = violation_ci_low_percent,
+      ymax = violation_ci_high_percent
+    ),
+    width = 1.0,
+    linewidth = 0.45,
+    alpha = 0.8
+  ) +
+
+  # Mean values
+  geom_point(
+    size = 2.6,
+    stroke = 0.7
+  ) +
+
+  # Four requested panels
+  facet_grid(
+    signal_label ~ feedback_label
+  ) +
+
+  # ----------------------------------------------------------
+  # PUBLICATION-FRIENDLY COLORS
+  # ----------------------------------------------------------
+
+  scale_colour_manual(
+    values = c(
+      "2×" = "#0072B2",
+      "3×" = "#D55E00",
+      "6×" = "#009E73"
+    )
+  ) +
+
+  # Different shapes for grayscale accessibility
+  scale_shape_manual(
+    values = c(
+      "2×" = 16,
+      "3×" = 17,
+      "6×" = 15
+    )
+  ) +
+
+  # Different line types as an additional visual cue
+  scale_linetype_manual(
+    values = c(
+      "2×" = "solid",
+      "3×" = "dashed",
+      "6×" = "dotdash"
+    )
+  ) +
+
+  # ----------------------------------------------------------
+  # X AXIS
+  # ----------------------------------------------------------
+
+  scale_x_continuous(
+    breaks = seq(0, 50, 10),
+    expand = expansion(
+      mult = c(0.02, 0.04)
+    )
+  ) +
+
+  # ----------------------------------------------------------
+  # LABELS
+  # ----------------------------------------------------------
+
+  labs(
+    x = "Packet loss probability (%)",
+    y = "Freshness violation rate (%)",
+    colour = "Deadline multiplier",
+    shape = "Deadline multiplier",
+    linetype = "Deadline multiplier"
+  ) +
+
+  # ----------------------------------------------------------
+  # PUBLICATION THEME
+  # ----------------------------------------------------------
+
+  theme_classic(
+    base_size = 12
+  ) +
+
+  theme(
+
+    # Axis titles
+    axis.title = element_text(
+      size = 12,
+      face = "bold"
+    ),
+
+    # Axis values
+    axis.text = element_text(
+      size = 10,
+      colour = "black"
+    ),
+
+    # Facet headers
+    strip.background = element_rect(
+      fill = "grey95",
+      colour = "black",
+      linewidth = 0.6
+    ),
+
+    strip.text = element_text(
+      size = 11,
+      face = "bold",
+      colour = "black"
+    ),
+
+    # Legend
+    legend.position = "top",
+
+    legend.title = element_text(
+      size = 10,
+      face = "bold"
+    ),
+
+    legend.text = element_text(
+      size = 10
+    ),
+
+    # Panel border
+    panel.border = element_rect(
+      colour = "black",
+      fill = NA,
+      linewidth = 0.6
+    ),
+
+    # Remove unnecessary grid
+    panel.grid = element_blank(),
+
+    # Margins
+    plot.margin = margin(
+      8, 8, 8, 8
+    )
+  )
+
+
+# ------------------------------------------------------------
+# 5. DISPLAY GRAPH
+# ------------------------------------------------------------
+
+print(graph5)
+
+
+# ------------------------------------------------------------
+# 6. SAVE HIGH-RESOLUTION PNG
+# ------------------------------------------------------------
+
+ggsave(
+  filename =
+    "Graph_5_Deadline_Freshness_Violations.png",
+
+  plot = graph5,
+
+  width = 8.5,
+  height = 6.5,
+  units = "in",
+
+  dpi = 600,
+  bg = "white"
+)
+
+
+# ------------------------------------------------------------
+# 7. SAVE VECTOR PDF
+# ------------------------------------------------------------
+
+ggsave(
+  filename =
+    "Graph_5_Deadline_Freshness_Violations.pdf",
+
+  plot = graph5,
+
+  width = 8.5,
+  height = 6.5,
+  units = "in"
+)
+```
+
+
+

@@ -1,0 +1,9 @@
+.venv/
+.venv-wsl/
+*.egg-info/
+__pycache__/
+*.pyc
+.pytest_cache/
+results/raw/*.csv
+results/summaries/*.csv
+results/figures/*.png

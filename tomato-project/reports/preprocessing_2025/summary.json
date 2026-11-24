@@ -1,0 +1,22 @@
+{
+  "source": "2025/soil2025.csv",
+  "source_sha256": "22e52db17116feb8ba5736466d4ef04f3ca0848d8ddc0ac0833267d21b988c86",
+  "raw_unchanged": true,
+  "processed": "data/processed/tomato_soil_2025.csv",
+  "processed_sha256": "1d1ded2b9608681bacb8cad8af1ab1a96cd5f6f89162c24074c5babb3e2c600b",
+  "records": 193066,
+  "devices": 10,
+  "timestamp_start": "2025-05-31 22:00:07.298000+00:00",
+  "timestamp_end": "2025-11-03 10:03:52.195000+00:00",
+  "invalid_or_missing_temperature": 0,
+  "invalid_or_missing_moisture": 0,
+  "zero_moisture_retained": 2283,
+  "gaps_over_three_nominal_intervals": 101,
+  "maximum_gap_minutes": 11867.098866666667,
+  "eligible_node_signal_segments": 188,
+  "split_records": {
+    "train": 231060,
+    "validation": 77038,
+    "test": 77130
+  }
+}

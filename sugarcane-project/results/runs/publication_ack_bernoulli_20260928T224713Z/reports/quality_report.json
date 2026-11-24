@@ -1,0 +1,147 @@
+{
+  "passed": true,
+  "checks": {
+    "estimation_unique_keys": true,
+    "estimation_expected_rows": true,
+    "estimation_no_infinity": true,
+    "estimation_no_unexpected_missing": true,
+    "channel_unique_keys": true,
+    "channel_expected_rows": true,
+    "channel_no_infinity": true,
+    "channel_no_unexpected_missing": true,
+    "freshness_unique_keys": true,
+    "freshness_expected_rows": true,
+    "freshness_no_infinity": true,
+    "freshness_no_unexpected_missing": true,
+    "calibration_unique_keys": true,
+    "calibration_expected_rows": true,
+    "calibration_no_infinity": true,
+    "calibration_no_unexpected_missing": true,
+    "normalized_missing_only_constant": true,
+    "delivery_bounds": true,
+    "zero_loss_delivery": true,
+    "zero_attempt_pdr": true,
+    "per_run_pdr": true,
+    "zero_loss_single_seed": true,
+    "shared_channel_traces": true,
+    "freshness_channel_link": true,
+    "deadline_minutes_from_multiplier": true,
+    "deadline_multiplier_coverage": true,
+    "freshness_bounds": true,
+    "aoi_bounds": true,
+    "stable_channel_seeds": true,
+    "independent_channel_seeds": true,
+    "disjoint_seed_sets": true,
+    "evaluation_seed_coverage": true,
+    "chronological_split_integrity": true,
+    "node_segment_coverage": true,
+    "record_counts_match_source": true,
+    "per_segment_condition_coverage": true,
+    "scenario_identity": true,
+    "condition_coverage": true,
+    "config_hash": true,
+    "dataset_hash": true,
+    "accuracy_summary_unique_keys": true,
+    "accuracy_summary_matches_recomputed_statistics": true,
+    "accuracy_summary_expected_rows": true,
+    "accuracy_summary_no_infinity": true,
+    "accuracy_summary_no_unexpected_missing": true,
+    "channel_summary_unique_keys": true,
+    "channel_summary_matches_recomputed_statistics": true,
+    "channel_summary_expected_rows": true,
+    "channel_summary_no_infinity": true,
+    "channel_summary_no_unexpected_missing": true,
+    "aggregate_pdr_packet_totals": true,
+    "freshness_summary_unique_keys": true,
+    "freshness_summary_matches_recomputed_statistics": true,
+    "freshness_summary_expected_rows": true,
+    "freshness_summary_no_infinity": true,
+    "freshness_summary_no_unexpected_missing": true,
+    "paired_comparison_unique_keys": true,
+    "paired_comparison_matches_recomputed_statistics": true,
+    "paired_comparison_expected_rows": true,
+    "paired_comparison_no_infinity": true,
+    "paired_comparison_no_unexpected_missing": true,
+    "unique_paired_counts": true,
+    "fdr_bounds": true,
+    "node_level_effects_unique_keys": true,
+    "node_level_effects_matches_recomputed_statistics": true,
+    "node_level_effects_expected_rows": true,
+    "node_level_effects_no_infinity": true,
+    "node_level_effects_no_unexpected_missing": true,
+    "all_nodes_in_figures": true,
+    "figure_thresholds_separate": true
+  },
+  "tables": {
+    "estimation": {
+      "actual_rows": 241600,
+      "expected_rows": 241600,
+      "missing_values": {
+        "nmse": 6040,
+        "nrmse": 6040
+      }
+    },
+    "channel": {
+      "actual_rows": 60400,
+      "expected_rows": 60400,
+      "missing_values": {
+        "packet_delivery_ratio": 4379,
+        "retry_fraction": 4379
+      }
+    },
+    "freshness": {
+      "actual_rows": 181200,
+      "expected_rows": 181200,
+      "missing_values": {}
+    },
+    "calibration": {
+      "actual_rows": 2400,
+      "expected_rows": 2400,
+      "missing_values": {}
+    },
+    "accuracy_summary": {
+      "actual_rows": 240,
+      "expected_rows": 240,
+      "missing_values": {}
+    },
+    "channel_summary": {
+      "actual_rows": 60,
+      "expected_rows": 60,
+      "missing_values": {}
+    },
+    "freshness_summary": {
+      "actual_rows": 180,
+      "expected_rows": 180,
+      "missing_values": {}
+    },
+    "paired_comparison": {
+      "actual_rows": 180,
+      "expected_rows": 180,
+      "missing_values": {
+        "aggregate_relative_improvement_percent": 6,
+        "mean_within_segment_seed_sd": 30
+      }
+    },
+    "node_level_effects": {
+      "actual_rows": 2160,
+      "expected_rows": 2160,
+      "missing_values": {}
+    }
+  },
+  "node_ids": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "segments": 80,
+  "undefined_policy": "Constant-trace normalization, zero-attempt PDR, loss-free seed SD and <2-node CIs are undefined, never imputed."
+}

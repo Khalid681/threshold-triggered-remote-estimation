@@ -1,0 +1,14 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.Rhistory
+.RData
+.Rproj.user/
+/results-final2/generated-figures/
+/results-final2/code/publication-figures.html
+/results-final2/code/publication-figures_files/
+results/raw/*.csv
+results/summaries/*.csv
+results/figures/*.png

@@ -1,0 +1,41 @@
+{
+  "method": "CSV string copy/filter/join only; no statistical recomputation",
+  "sources": {
+    "Results2\\tomato2025-ack\\run_metadata.json": "fcfeadb67b985af36bf3fc9c353981e26e0c3ae65cf2cdf836a0b7b64e63db86",
+    "Results2\\tomato2025-ack\\reports\\quality_report.json": "aa796c9c89f7489dd981fb7209ddbaf945c992cd665ffdebfab93657183564c2",
+    "Results2\\tomato2025-ack\\summaries\\accuracy_summary.csv": "917cf429cbc49ac4344573a2e9083e5036456d02b7882a6d18f52c163371c996",
+    "Results2\\tomato2025-ack\\summaries\\paired_comparison.csv": "057aa49c4d77c7eef7fcaeb65c7ef5fd759494fd38b2288decd9ee82586e8848",
+    "Results2\\tomato2025-ack\\summaries\\channel_summary.csv": "45a3221320dcc1b27c95dce2e00416603149a187f3fd1399a5705103ea17824d",
+    "Results2\\tomato2025-ack\\summaries\\freshness_summary.csv": "b572decd4a8f40f800dcccd6b6fd82afd1294f8958d868dd939c1e6030ee8c69",
+    "Results2\\tomato2025-no-ack\\run_metadata.json": "419ec22fac37818e0878332bb8808656e8fb62555398464d35ef8feb4b8de593",
+    "Results2\\tomato2025-no-ack\\reports\\quality_report.json": "429915f83cb4749b6301c50919845cdd5b9a3961d5f16ebdb786385090e5e3c8",
+    "Results2\\tomato2025-no-ack\\summaries\\accuracy_summary.csv": "9c9093bfa689a79ab913701ddf6975d920b0c506da65c307f35172103d2147e0",
+    "Results2\\tomato2025-no-ack\\summaries\\paired_comparison.csv": "37351cbdcdfafadfeb57d87c71c9c55264aaa0480534bc49f6d230c35d44170e",
+    "Results2\\tomato2025-no-ack\\summaries\\channel_summary.csv": "12913ef73de218334eca08d9f288d8dfd5836da47425d997a5b433a95192f157",
+    "Results2\\tomato2025-no-ack\\summaries\\freshness_summary.csv": "364f9ffdc333c2b684c3467fea599cab2fa50d043c609a0b95301e6fa0a1f51b",
+    "Results2\\tomato2025-baseline\\raw\\baseline_validation.csv": "8b46aa60e59b6eaccee0c84418f46f14193f3a1a32336e327be218d3334414a4"
+  },
+  "exports": {
+    "Graph_2_Accuracy_vs_Packet_Loss.csv": {
+      "rows": 480,
+      "sha256": "acc3d7eabfe4785c1c687f574c00a40d819a1c08b8cf1768fdb37e4bcf653a97"
+    },
+    "Graph_3_Weighted_Drift_Improvement.csv": {
+      "rows": 120,
+      "sha256": "759b37f67148b1cca2ca8a161ec510a9ca20fdcf01f0b2214877acb7b795e724"
+    },
+    "Graph_4_Accuracy_Freshness_Communication.csv": {
+      "rows": 240,
+      "sha256": "05c9ff7e064d0ed529269b963a99b67c1da0ddf37fd14139375b628a141df66b"
+    },
+    "Graph_5_Deadline_Freshness_Violations.csv": {
+      "rows": 360,
+      "sha256": "1fa963e1e27db60d59c87457f0c85ed1a3642017661d0b17d1990073e69dfd85"
+    },
+    "Graph_1_Baseline_Validation.csv": {
+      "rows": 10,
+      "sha256": "8b46aa60e59b6eaccee0c84418f46f14193f3a1a32336e327be218d3334414a4"
+    }
+  },
+  "source_cells_preserved": true
+}

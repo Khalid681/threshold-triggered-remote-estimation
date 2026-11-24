@@ -1,0 +1,5 @@
+Running 80 node-signal segments
+Completed 432,000 estimator-level rows
+Saved results/raw/agriculture_experiments.csv
+Saved results/raw/calibration_results.csv
+Saved results/summaries/agriculture_summary.csv
